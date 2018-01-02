@@ -81,9 +81,9 @@ WSGI_APPLICATION = 'yatcm.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'yatcm',
+        'NAME': 'yatcm-1-02',
         'USER': 'jianping',
-        'PASSWORD': 'nankai',
+        'PASSWORD': 'nankai123456',
         'HOST': 'localhost',
         'PORT': 5432,
     }
