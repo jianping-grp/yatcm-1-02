@@ -1,12 +1,10 @@
 import sys
 import inspect
 
-from django.shortcuts import render, get_object_or_404
-from rest_framework import generics, permissions
+from rest_framework import permissions
 from rest_framework import viewsets, views
-from .models import *   #NOQA
-from .serializers import *  #NOQA
-from rest_framework.response import Response
+from compounds.script_new.serializers import *  #NOQA
+
 # Create your views here.
 
 __all__ = []

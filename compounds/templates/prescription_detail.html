@@ -3,27 +3,27 @@
 {% block content %}
 
     <style>
-        table, th, td {
-            border: 1px solid black;
-            border-collapse: collapse;
-        }
-        th, td {
-            padding: 5px;
-            text-align: center;
-        }
-        th {
-            background-color: grey;
-        }
-        table#t01 tr:nth-child(even) {
-            background: #eee
-        }
-        table#t01 tr:nth-child(odd) {
-            background: #fff;
-        }
-        table#t01 th {
-            background-color: grey;
-            color: white;
-        }
+        {#table, th, td {#}
+        {#    border: 1px solid black;#}
+        {#    border-collapse: collapse;#}
+        {#}#}
+        {#th, td {#}
+        {#    padding: 5px;#}
+        {#    text-align: center;#}
+        {#}#}
+        {#th {#}
+        {#    background-color: grey;#}
+        {#}#}
+        {#table#t01 tr:nth-child(even) {#}
+        {#    background: #eee#}
+        {#}#}
+        {#table#t01 tr:nth-child(odd) {#}
+        {#    background: #fff;#}
+        {#}#}
+        {#table#t01 th {#}
+        {#    background-color: grey;#}
+        {#    color: white;#}
+        {#}#}
     </style>
 
     <div class="container">
@@ -55,10 +55,13 @@
                             {% endfor %}
                         </li>
 
-                        <h4><strong>Ingredients</strong></h4>
-{#                        <h5><strong>{{ compounds | length }} records</strong></h5>#}
-                        <table>
-                            <caption><h5><strong>{{ compounds | length }} records</strong></h5></caption>
+
+
+                        <li class="list-group-item">
+                           <strong>Ingredients:</strong>{{ compounds | length }} records
+
+
+                        <table class="table table-hover table-striped table-bordered">
                             <tr>
                                 <th>Herbs</th>
                                 <th colspan="5">Structures</th>
@@ -77,7 +80,7 @@
                             {% endfor %}
 
                         </table>
-
+                        </li>
                         <li class="list-group-item">
                             <strong>Traditional Explanation:</strong>{{ prescription.fangjie }}
                         </li>
@@ -129,9 +132,9 @@
                             {% for pre in prescription.prescription_set.all %}
                                 <li class="list-group-item">
                                     {% if pre.english_name %}
-                                        <a href="{{ pre.get_absolute_url }}">
-                                           {{ pre.chinese_name }} ({{ pre.enlish_name | title }})
-                                        </a>
+                                        {{ pre.chinese_name }} (<a href="{{ pre.get_absolute_url }}">
+                                            {{ pre.english_name }})
+                                    </a>
                                     {% else %}
                                         {{ pre.chinese_name }} (<a href="{{ pre.get_absolute_url }}">
                                             {{ pre.pinyin_name | title}})

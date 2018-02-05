@@ -1,120 +1,196 @@
-from rest_framework import serializers
-from .models import *
-from rest_framework_recursive.fields import RecursiveField
+from . import models
+from dynamic_rest import serializers
+from rest_framework.permissions import AllowAny
 
-# __all__ = [
-#     "ChineseIdentitySerializer",
-#     "EnglishIdentitySerializer",
-#     "CompoundSerializer",
-#     # "StructureSerializer",
-#     "HerbSerializer",
-#     "ChEMBlSerializer",
-#     "CASSerializer",
-#     "CIDSerializer",
-#     "TCMTaxonomySerializer",
-#     "KEGGPathwayCategorySerializer",
-#     "KEGGCompoundSerializer",
-#     "KEGGPathwaySerializer",
-#     "KEGGSimilaritySerializer",
-#     "PrescriptionSerializer"
-# ]
+class EnglishIdentitySerializer(serializers.DynamicModelSerializer):
+    class Meta:
+        model = models.EnglishIdentity
+        exclude = []
+
+class ChineseIdentitySerializer(serializers.DynamicModelSerializer):
+    class Meta:
+        model = models.ChineseIdentity
+        exclude = []
 
 
-class ChineseIdentitySerializer(serializers.ModelSerializer):
+class CompoundSerializer(serializers.DynamicModelSerializer):
+    chembls = serializers.DynamicRelationField('ChEMBLSerializer', many=True, deferred=True, embed=True)
+    related_ChEMBL_targets = serializers.DynamicRelationField('CHEMBLTargetSerializer', many=True, deferred=True, embed=True)
+    related_compounds = serializers.DynamicRelationField('CompoundSerializer', many=True, deferred=True, embed=True)
+    compound_ms_set = serializers.DynamicRelationField('Compound_MSSerializer', many=True, deferred=True, embed=True)
+    target_set = serializers.DynamicRelationField('TargetSerializer', many=True, deferred=True, embed=True)
+    compoundfirstcategory_set = serializers.DynamicRelationField('CompoundFirstCategorySerializer', many=True, deferred=True, embed=True)
+    compoundsecondcategory_set = serializers.DynamicRelationField('CompoundSecondCategorySerializer', many=True, deferred=True, embed=True)
+    herb_set = serializers.DynamicRelationField('HerbSerializer', many=True, deferred=True, embed=True)
+    tcmid_herbs_set = serializers.DynamicRelationField('TCMID_HerbsSerializer', many=True, deferred=True, embed=True)
+    keggcompound_set = serializers.DynamicRelationField('KEGGCompoundSerializer', many=True, deferred=True, embed=True)
+    keggsimilarity_set = serializers.DynamicRelationField('KEGGSimilaritySerializer', many=True, deferred=True, embed=True)
+
+
 
     class Meta:
-        model = ChineseIdentity
-        fields = "__all__"
+        model = models.Compound
+        exclude = ['bfp', 'mol', 'mol_block']
 
-
-class EnglishIdentitySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = EnglishIdentity
-        fields = "__all__"
-
-
-# class StructureSerializer(serializers.ModelSerializer):
-#     compound = serializers.PrimaryKeyRelatedField(read_only=True)
-#
-#     class Meta:
-#         model = Structure
-#         exclude = ('mol', 'bfp', 'mol_block')
-#         read_only_fields = ('formula', 'alogp', 'psa', 'rtb', 'mol_weight', 'hba', 'hbd')
-
-
-class CompoundSerializer(serializers.ModelSerializer):
-    herb_set = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
-    englisthidentity_set = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
-    chineseidentity_set = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+class Compound_MSSerializer(serializers.DynamicModelSerializer):
+    compound = serializers.DynamicRelationField('CompoundSerializer', many=True, deferred=True, embed=True)
 
     class Meta:
-        model = Compound
-        exclude = ('mol', 'bfp', 'mol_block')
-        read_only_fields = ('formula', 'alogp', 'psa', 'rtb', 'mol_weight', 'hba', 'hbd')
-        # depth =1     # nested depth
+        model = models.Compound_MS
+        exclude = []
 
-
-class HerbSerializer(serializers.ModelSerializer):
-    prescription_set = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+class TargetSerializer(serializers.DynamicModelSerializer):
+    related_drugs = serializers.DynamicRelationField('DrugsSerializer', many=True, deferred=True, embed=True)
+    related_diseases = serializers.DynamicRelationField('DiseasesSerializer', many=True, deferred=True, embed=True)
+    compounds = serializers.DynamicRelationField('CompoundSerializer', many=True, deferred=True, embed=True)
 
     class Meta:
-        model = Herb
-        # fields = "__all__"
+        model = models.Target
+        exclude = []
+
+class DrugsSerializer(serializers.DynamicModelSerializer):
+    class Meta:
+        model = models.Drugs
+        exclude = []
+
+class DiseasesSerializer(serializers.DynamicModelSerializer):
+    target_set = serializers.DynamicRelationField('TargetSerializer', many=True, deferred=True, embed=True)
+
+    class Meta:
+        model = models.Diseases
+        exclude = []
+
+class CompoundFirstCategorySerializer(serializers.DynamicModelSerializer):
+    compounds = serializers.DynamicRelationField('CompoundSerializer', many=True, deferred=True, embed=True)
+    compoundsecondcategory_set = serializers.DynamicRelationField('CompoundSecondCategorySerializer', many=True, deferred=True, embed=True)
+    class Meta:
+        model = models.CompoundFirstCatagory
+        exclude = []
+
+class CompoundSecondCategorySerializer(serializers.DynamicModelSerializer):
+    compounds = serializers.DynamicRelationField('CompoundSerializer', many=True, deferred=True, embed=True)
+    first_category = serializers.DynamicRelationField('CompoundSerializer', many=True, deferred=True, embed=True)
+
+    class Meta:
+        model = models.CompoundSecondCatagory
+        exclude = []
+
+class HerbSerializer(serializers.DynamicModelSerializer):
+    related_herbs = serializers.DynamicRelationField('HerbSerializer', many=True, deferred=True, embed=True)
+    compounds = serializers.DynamicRelationField('CompoundSerializer', many=True, deferred=True, embed=True)
+    subherb_set = serializers.DynamicRelationField('SubHerbSerializer', many=True, deferred=True, embed=True)
+    # taxonomy = serializers.DynamicRelationField('TaxonomySerializer', many=True, deferred=True, embed=True)
+
+    class Meta:
+        model = models.Herb
         exclude = ['taxonomy']
 
-
-class CIDSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CID
-        fields = "__all__"
-
-
-class CASSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CAS
-        fields = "__all__"
-
-
-# class ChEMBlSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = ChEMBL
-#         fields = "__all__"
-
-
-class TCMTaxonomySerializer(serializers.ModelSerializer):
-    # children = serializers.ListField(read_only=True, child=RecursiveField())
+class SubHerbSerializer(serializers.DynamicModelSerializer):
+    herb = serializers.DynamicRelationField('HerbSerializer', many=True, deferred=True, embed=True)
 
     class Meta:
-        model = TCMTaxonomy
-        fields = "__all__"
-        # exclude = ['parent']
+        model = models.SubHerb
+        exclude = ['taxonomy']
 
+class TCMID_HerbsSerializer(serializers.DynamicModelSerializer):
+    compounds = serializers.DynamicRelationField('CompoundSerializer', many=True, deferred=True, embed=True)
 
-class KEGGCompoundSerializer(serializers.ModelSerializer):
     class Meta:
-        model = KEGGCompound
-        fields = "__all__"
+        model = models.TCMID_Herbs
+        exclude = []
 
+class PrescriptionSerializer(serializers.DynamicModelSerializer):
+    herbs = serializers.DynamicRelationField('HerbSerializer', many=True, deferred=True, embed=True)
+    main_prescription = serializers.DynamicRelationField('PrescriptionSerializer', many=True, deferred=True, embed=True)
 
-class KEGGPathwaySerializer(serializers.ModelSerializer):
     class Meta:
-        model = KEGGPathway
-        fields = "__all__"
+        model = models.Prescription
+        exclude = []
 
+class ChEMBLSerializer(serializers.DynamicModelSerializer):
+    compound_set = serializers.DynamicRelationField('CompoundSerializer', many=True, deferred=True, embed=True)
+    assay_chembl_ids = serializers.DynamicRelationField('Assay_Chembl_idSerializer', many=True, deferred=True, embed=True)
+    doc_chembl_ids = serializers.DynamicRelationField('Doc_Chembl_idSerializer', many=True, deferred=True, embed=True)
+    target_chembl_ids = serializers.DynamicRelationField('Target_Chembl_idSerializer', many=True, deferred=True, embed=True)
 
-class KEGGSimilaritySerializer(serializers.ModelSerializer):
     class Meta:
-        model = KEGGSimilarity
-        fields = "__all__"
+        model = models.ChEMBL
+        exclude = []
 
-
-class KEGGPathwayCategorySerializer(serializers.ModelSerializer):
+class Assay_Chembl_idSerializer(serializers.DynamicModelSerializer):
+    chembl_set = serializers.DynamicRelationField('ChEMBLSerializer', many=True, deferred=True, embed=True)
     class Meta:
-        model = KEGGPathwayCategory
-        fields = "__all__"
+        model = models.Assay_Chembl_id
+        exclude = []
 
-
-class PrescriptionSerializer(serializers.ModelSerializer):
+class Doc_Chembl_idSerializer(serializers.DynamicModelSerializer):
+    chembl_set = serializers.DynamicRelationField('ChEMBLSerializer', many=True, deferred=True, embed=True)
     class Meta:
-        model = Prescription
-        fields = "__all__"
+        model = models.Doc_Chembl_id
+        exclude = []
+
+class Target_Chembl_idSerializer(serializers.DynamicModelSerializer):
+    chembl_set = serializers.DynamicRelationField('ChEMBLSerializer', many=True, deferred=True, embed=True)
+    class Meta:
+        model = models.Target_Chembl_id
+        exclude = []
+
+
+class CHEMBLTargetSerializer(serializers.DynamicModelSerializer):
+    compound_set = serializers.DynamicRelationField('CompoundSerializer', many=True, deferred=True, embed=True)
+
+    class Meta:
+        model = models.CHEMBLTarget
+        exclude = []
+
+class CIDSerializer(serializers.DynamicModelSerializer):
+    compound = serializers.DynamicRelationField('CompoundSerializer', many=True, deferred=True, embed=True)
+
+    class Meta:
+        model = models.CID
+        exclude = []
+
+class CASSerializer(serializers.DynamicModelSerializer):
+    compound = serializers.DynamicRelationField('CompoundSerializer', many=True, deferred=True, embed=True)
+
+    class Meta:
+        model = models.CAS
+        exclude = []
+
+class KEGGPathwayCategorySerializer(serializers.DynamicModelSerializer):
+    Keggpathway_set = serializers.DynamicRelationField('KEGGPathwaySerializer', many=True, deferred=True, embed=True)
+    class Meta:
+        model = models.KEGGPathwayCategory
+        exclude = []
+
+class KEGGPathwaySerializer(serializers.DynamicModelSerializer):
+    category = serializers.DynamicRelationField('KEGGPathwayCategorySerializer', many=True, deferred=True, embed=True)
+    keggcompound_set = serializers.DynamicRelationField('KEGGCompoundSerializer', many=True, deferred=True, embed=True)
+
+    class Meta:
+        model = models.KEGGPathway
+        exclude = []
+
+class KEGGCompoundSerializer(serializers.DynamicModelSerializer):
+    pathway = serializers.DynamicRelationField('KEGGPathwaySerializer', many=True, deferred=True, embed=True)
+    similar_to_tcm = serializers.DynamicRelationField('CompoundSerializer', many=True, deferred=True, embed=True)
+    keggsimilarity_set = serializers.DynamicRelationField('KEGGSimilaritySerializer', many=True, deferred=True, embed=True)
+
+    class Meta:
+        model = models.KEGGCompound
+        exclude = ['mol', 'mol_block']
+
+class KEGGSimilaritySerializer(serializers.DynamicModelSerializer):
+    tcm = serializers.DynamicRelationField('CompoundSerializer', many=True, deferred=True, embed=True)
+    kegg_compound = serializers.DynamicRelationField('KEGGCompoundSerializer', many=True, deferred=True, embed=True)
+
+    class Meta:
+        model = models.KEGGSimilarity
+        exclude = []
+
+class FeedbackSerializer(serializers.DynamicModelSerializer):
+    class Meta:
+        model = models.Feedback
+        exclude = []
+
+

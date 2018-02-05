@@ -18,22 +18,28 @@ from django.contrib import admin
 from django.conf.urls.static import static
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework_swagger.views import get_swagger_view
+#from rest_framework_swagger.views import get_swagger_view
 from .views import IndexView, AboutView, ContactView
 from graphene_django.views import GraphQLView
+from compounds import urls as compound_urls
 
-schema_view = get_swagger_view(title="yatcm API")
+#schema_view = get_swagger_view(title="yatcm API")
+
+# urlpatterns = [
+#     url(r"^yatcm/$", IndexView.as_view(), name="index"),
+#     url(r'yatcm/about/$', AboutView.as_view(), name="about"),
+#     url(r'yatcm/contact/$', ContactView.as_view(), name="contact"),
+#     url(r'^yatcm/admin/', admin.site.urls),
+#     url(r'^yatcm/graphql', csrf_exempt(GraphQLView.as_view(graphiql=True)), name="graphql"),
+#     url(r"^yatcm/", include('compounds.urls')),
+#     # url(r'^docs/', include('rest_framework_docs.urls')),
+#     # url(r'yatcm/api-auth', include("rest_framework.urls", namespace='rest_framework')),
+#    # url(r"^yatcm/docs/$", schema_view),
+# ]
 
 urlpatterns = [
-    url(r"^yatcm/$", IndexView.as_view(), name="index"),
-    url(r'yatcm/about/$', AboutView.as_view(), name="about"),
-    url(r'yatcm/contact/$', ContactView.as_view(), name="contact"),
-    url(r'^yatcm/admin/', admin.site.urls),
-    url(r'^yatcm/graphql', csrf_exempt(GraphQLView.as_view(graphiql=True)), name="graphql"),
-    url(r"^yatcm/", include('compounds.urls')),
-    # url(r'^docs/', include('rest_framework_docs.urls')),
-    url(r'yatcm/api-auth', include("rest_framework.urls", namespace='rest_framework')),
-    url(r"^yatcm/docs/$", schema_view),
+    url(r'^admin/', admin.site.urls),
+    url(r'^api/', include(compound_urls.urlpatterns))
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

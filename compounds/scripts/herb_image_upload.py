@@ -29,14 +29,6 @@ def herb_upload(row_number):
         herb.image.save(image_name, img)
         herb.save()
 
-
-
-
-
-
-
-
-
 if __name__ == '__main__':
     herb_file = '/home/jianping/Desktop/second_version/new/7629_traditional_herbs_last_1_add_pic.xlsx'
     table = xlrd.open_workbook(herb_file).sheet_by_index(0)

@@ -1,1 +1,59 @@
 {% extends "base.html" %}
+{% load static staticfiles i18n%}
+
+{% block css %}
+<link href="{% static "css/index/carouse.css" %}" rel="stylesheet">
+<link href="{% static "css/about.css" %}" rel="stylesheet">
+{% endblock css %}
+
+{% block content %}
+<div id="helpCarousel" class="carousel slide" data-ride="carousel">
+    <!-- Indicators -->
+    <ol class="carousel-indicators">
+        <li data-target="#helpCarousel" data-slide-to="0" class="active"></li>
+        <li class="" data-target="#helpCarousel" data-slide-to="1"></li>
+        <li class="" data-target="#helpCarousel" data-slide-to="2"></li>
+        <li class="" data-target="#helpCarousel" data-slide-to="3"></li>
+    </ol>
+    <div class="carousel-inner" role="listbox" >
+        <div class="item active">
+            <h4 class="text-position"><strong>Data Browse</strong></h4>
+            <span>
+                <img src="{% static "image/help_image/browse.png" %}" alt="First slide" >
+            </span>
+        </div>
+        <div class="item">
+            <h4 class="text-position"><strong>Structure Search</strong></h4>
+            <span>
+              <img src="{% static "image/help_image/structure_search.png" %}" alt="Second slide">
+            </span>
+        </div>
+        <div class="item">
+            <h4 class="text-position"><strong>GraphiQL</strong></h4>
+            <span>
+                <img src="{% static "image/help_image/graphiql.png" %}" alt="Second slide">
+            </span>
+        </div>
+        <div class="item">
+            <h4 class="text-position"><strong>Keyword Search</strong></h4>
+            <span>
+                <img src="{% static "image/help_image/yupingfeng.png" %}" alt="Second slide">
+            </span>
+        </div>
+    </div>
+    <a  class="left carousel-control" href="#helpCarousel" role="button" data-slide="prev">
+        <!--<span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>-->
+      <span class="text-primary">Previous</span>
+
+    </a>
+    <a class="right carousel-control" href="#helpCarousel" role="button" data-slide="next">
+        <!--<span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>-->
+        <span class="text-primary">Next</span>
+    </a>
+</div>
+
+{% endblock content %}
+{% block js %}
+<script src="{% static "js/index/doc.js" %}"></script>
+{% endblock js %}
+

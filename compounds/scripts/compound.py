@@ -37,11 +37,21 @@ def upload_compound(row_number):
     cids = extract_cids(row[5])
     cass = row[6].split('\n') if row[6] else []
 
+    # compound, created = Compound.objects.get_or_create(
+    #     english_name=english_name,
+    #     chinese_name=chinese_name,
+    #     smiles=smiles
+    # )
+
     compound, created = Compound.objects.get_or_create(
         english_name=english_name,
-        chinese_name=chinese_name,
-        smiles=smiles
+        chinese_name=chinese_name
     )
+    try:
+        compound.smiles = smiles
+        compound.save()
+    except:
+        print chinese_name + ':' + english_name + ' can not be generated'
 
     for cn_identity in chinese_synonyms:
         chinese_identity, created = ChineseIdentity.objects.get_or_create(identity=cn_identity)
@@ -82,9 +92,6 @@ def upload_compound(row_number):
             logging.info("Can not find %s, %s in databasecuo" % (herb[0], herb[1]))
         except Herb.MultipleObjectsReturned:
             logging.info("return multiple herbs %s, %s" % (herb[0], herb[1]))
-
-
-
 
 
 if __name__ == '__main__':

@@ -11,3 +11,5 @@ django-cors-headers
 django-bootstrap-pagination
 django-mptt
 psycopg2
+numpy
+pillow

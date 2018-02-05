@@ -25,7 +25,14 @@ SECRET_KEY = '-rl7%7(rk()p1c95ny!*))a3-qyg8ou*4np9db+_-q-1w97ne)'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '222.30.50.66',
+    '0.0.0.0',
+    'cadd.pharmacy.nankai.edu.cn',
+    '172.16.15.179'
+]
 
 
 # Application definition
@@ -38,10 +45,15 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'compounds',
+    'rest_framework',
+    'django_rdkit',
+    'django_extensions',
+    'django_filters',
+    'dynamic_rest',
     'graphene_django',
     'corsheaders',
     'bootstrap_pagination',
-    'rest_framework_swagger'
+    #'rest_framework_swagger'
 ]
 
 MIDDLEWARE = [
@@ -81,10 +93,10 @@ WSGI_APPLICATION = 'yatcm.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'yatcm',
+        'NAME': 'yatcm_1',
         'USER': 'jianping',
         'PASSWORD': 'nankai',
-        'HOST': 'localhost',
+        'HOST': '127.0.0.1',
         'PORT': 5432,
     }
 }
@@ -126,16 +138,18 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
-STATIC_URL = '/yatcm/static/'
-MEDIA_URL = '/yatcm/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-STATIC_ROOT = os.path.join(BASE_DIR, 'collected_static')
-
+STATIC_URL = '/static/'
+MEDIA_URL = '/media_1/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media_1')
+#STATIC_ROOT = os.path.join(BASE_DIR, 'collected_static')
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'collected_static')
+]
 # rest frame pagination
-REST_FRAMEWORK = {
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
-    "PAGE_SIZE": 50
-}
+# REST_FRAMEWORK = {
+#     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
+#     "PAGE_SIZE": 50
+# }
 
 GRAPHENE = {
     'SCHEMA': 'yatcm.schema.schema',
@@ -144,11 +158,37 @@ GRAPHENE = {
     ]
 }
 
-REST_FRAMEWORK = {
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
-    "PAGE_SIZE": 50
-}
+# REST_FRAMEWORK = {
+#     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
+#     "PAGE_SIZE": 50
+# }
 
 # CORS confige
+# CORS_ORIGIN_ALLOW_ALL = True
+#CORS_URLS_REGEX = r'^/api/.*$'
+
+
+REST_FRAMEWORK = {
+    'PAGE_SIZE': 10,
+    'DETAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'DEFAULT_PERMISSION_CLASSES':[
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+    ),
+    'DEFAULT_FILTER_BACKENDS': (
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ),
+}
+
+DYNAMIC_REST = {
+    'DEBUG': True,
+    'PAGE_QUERY_PARAM': 'page'
+}
+
+CSRF_COOKIE_SECURE = False
+SHELL_PLUS_PRINT_SQL = True
+
 CORS_ORIGIN_ALLOW_ALL = True
-CORS_URLS_REGEX = r'^/api/.*$'
+CORS_ALLOW_CREDENTIALS = True

@@ -27,7 +27,10 @@ def mol_plotter():
         if not os.path.exists(image_file):
             Draw.MolToFile(compound.mol, image_file)
         img = File(open(image_file))
-        compound.mol_image.save(image_name, img)
+        try:
+            compound.mol_image.save(image_name, img)
+        except:
+            compound.mol_image.save('could not create molecule from %s' % image_name, img)
 
         mol_file_name = "%s.mol" % compound.pk
         mol_file = os.path.join(MOL_DIR, mol_file_name)

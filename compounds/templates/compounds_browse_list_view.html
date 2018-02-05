@@ -1,0 +1,33 @@
+{% extends 'browse.html' %}
+{% load static staticfiles bootstrap_pagination %}
+{% block css %}
+    <link href="{% static "css/browse.css" %}" rel="stylesheet">
+{% endblock %}
+{% block browse-table %}
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Chinese name</th>
+            <th>English name</th>
+{#            <th>Phonetic name</th>#}
+            <th>Structure</th>
+            <th>Detail</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for compound in  compound_list %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+{#                <td><img src="{% static herb.image %}" class="img-table img-thumbnail img-table"></td>#}
+                <td>{{ compound.chinese_name }}</td>
+                <td>{{ compound.english_name }}</td>
+                <td> {{ compound.mol_image }}</td>
+{#                <td><a href="{% url "herb_related_compounds" herb.pk %}">{{ herb.compounds.all | length }}</a></td>#}
+            <td><a href="{% url 'compound_detail' compound.id %}">view</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% bootstrap_paginate page_obj range=10 %}
+{% endblock %}

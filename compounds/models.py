@@ -27,6 +27,15 @@ __all__ = [
     'KEGGCompound', 'KEGGPathway', 'Herb', 'Prescription', 'EnglishIdentity', 'ChineseIdentity',
 ]
 
+class CompoundManager(models.Manager):
+    def structure_search(self, smiles, similarity):
+        search_mfp2 = MORGANBV_FP(Value(smiles))
+        config.tanimoto_threshold = similarity
+        query_set = super(CompoundManager, self).get_queryset().filter(bfp__tanimoto=search_mfp2)
+        query_set = query_set.annotate(similarity=TANIMOTO_SML('bfp', search_mfp2))
+        query_set = query_set.order_by('-similarity')
+        return query_set
+
 class Identity(models.Model):
     identity = models.CharField(max_length=1024)
     compound = models.ForeignKey(
@@ -53,7 +62,10 @@ class Compound(models.Model):
     """
     store the structure information
     """
-    english_name = models.CharField(max_length=1024, blank=True)
+
+    objects = CompoundManager()
+
+    english_name = models.CharField(max_length=1024, blank=True, null=True)
     chinese_name = models.CharField(max_length=2012, null=True, blank=True)
 
     smiles = models.CharField(max_length=1024, blank=True)
@@ -64,11 +76,10 @@ class Compound(models.Model):
     mol_image = models.ImageField(upload_to='mol_images/', blank=True, null=True)
 
     chembls = models.ManyToManyField('ChEMBL', blank=True)
-
+    related_ChEMBL_targets = models.ManyToManyField('CHEMBLTarget', blank=True)
     related_compounds = models.ManyToManyField(
         'self', blank=True
     )
-
 
     first_created = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
@@ -135,7 +146,7 @@ class Compound(models.Model):
         return reverse('compound_detail', args=[self.pk])
 
     def get_kegg_pathways(self):
-        li = list(set(it.chain.from_iterable([x.pathway.all() for x in self.keggcompound_set_all()])))
+        li = list(set(it.chain.from_iterable([x.pathway.all() for x in self.keggcompound_set.all()])))
         return li
 
     class Meta:
@@ -151,7 +162,7 @@ class Compound_MS(models.Model):
         return self.ms_link
 
 @python_2_unicode_compatible
-class Target(models.Model):
+class Target(models.Model):   #### The target information comes from TCMID, it is not SEA prediction
     target_name = models.CharField(max_length=2048, null=True, blank=True)
     gene_name = models.CharField(max_length=2048, null=True, blank=True)
     uniprot_name = models.CharField(max_length=1024, null=True, blank=True)
@@ -199,23 +210,26 @@ class CompoundSecondCatagory(models.Model):
 
 @python_2_unicode_compatible
 class Herb(models.Model):
-    Chinese_name = models.CharField(max_length=1024, blank=True)
-    pinyin_name = models.CharField(max_length=1024, blank=True)
-    English_name = models.CharField(max_length=1024, blank=True)
+    Chinese_name = models.CharField(max_length=1024, blank=True, null=True)
+    Chinese_synonyms = models.CharField(max_length=1024, blank=True, null=True)
+    pinyin_name = models.CharField(max_length=1024, blank=True, null=True)
+    English_name = models.CharField(max_length=1024, blank=True, null=True)
     latin_name = models.CharField(max_length=1024, blank=True, null=True)
-    first_catagory_chinese = models.CharField(max_length=1024, blank=True)
-    first_catagory_english = models.CharField(max_length=1024, blank=True)
-    second_catagory_chinese = models.CharField(max_length=1024, blank=True)
-    second_catagory_english = models.CharField(max_length=1024, blank=True)
+    first_catagory_chinese = models.CharField(max_length=1024, blank=True, null=True)
+    first_catagory_english = models.CharField(max_length=1024, blank=True, null=True)
+    second_catagory_chinese = models.CharField(max_length=1024, blank=True, null=True)
+    second_catagory_english = models.CharField(max_length=1024, blank=True, null=True)
     image = models.ImageField(upload_to='herb_images', blank=True, null=True)
-    wiki_english = models.URLField(blank=True)
-    wiki_chinese = models.URLField(blank=True)
+    wiki_english = models.URLField(blank=True, null=True)
+    wiki_chinese = models.URLField(blank=True, null=True)
     drug_property = models.CharField(max_length=1024, blank=True, null=True)
     meridians = models.CharField(max_length=1024, blank=True, null=True)
     use_part = models.CharField(max_length=1024, blank=True, null=True)
     effect = models.CharField(max_length=1024, blank=True, null=True)
     indication = models.CharField(max_length=1024, blank=True, null=True)
-    source_id = models.CharField(max_length=1024, blank=True, null=True)
+    # source_id = models.CharField(max_length=1024, blank=True, null=True)
+    related_id = models.IntegerField(null=True, blank=True)
+    sub_herb_link_id = models.IntegerField(blank=True, null=True)
 
     related_herbs = models.ForeignKey('self', blank=True, null=True) ### Can ManyToManyField() do?
     taxonomy = models.ForeignKey('TCMTaxonomy', blank=True, on_delete=models.CASCADE, null=True)
@@ -223,6 +237,40 @@ class Herb(models.Model):
 
     def get_absolute_url(self):
         return reverse('herb_detail', args=[self.pk])
+
+    def __str__(self):
+        return self.English_name or self.Chinese_name
+
+@python_2_unicode_compatible
+class SubHerb(models.Model):
+    Chinese_name = models.CharField(max_length=1024, blank=True, null=True)
+    # Chinese_synonyms = models.CharField(max_length=1024, blank=True, null=True)
+    pinyin_name = models.CharField(max_length=1024, blank=True, null=True)
+    English_name = models.CharField(max_length=1024, blank=True, null=True)
+    latin_name = models.CharField(max_length=1024, blank=True, null=True)
+    first_catagory_chinese = models.CharField(max_length=1024, blank=True, null=True)
+    first_catagory_english = models.CharField(max_length=1024, blank=True, null=True)
+    second_catagory_chinese = models.CharField(max_length=1024, blank=True, null=True)
+    second_catagory_english = models.CharField(max_length=1024, blank=True, null=True)
+    image = models.ImageField(upload_to='herb_images', blank=True, null=True)
+    wiki_english = models.URLField(blank=True, null=True)
+    wiki_chinese = models.URLField(blank=True, null=True)
+    drug_property = models.CharField(max_length=1024, blank=True, null=True)
+    meridians = models.CharField(max_length=1024, blank=True, null=True)
+    use_part = models.CharField(max_length=1024, blank=True, null=True)
+    effect = models.CharField(max_length=1024, blank=True, null=True)
+    indication = models.CharField(max_length=1024, blank=True, null=True)
+    # source_id = models.CharField(max_length=1024, blank=True, null=True)
+    related_id = models.IntegerField(null=True, blank=True)
+    sub_herb_link_id = models.IntegerField(blank=True, null=True)
+
+    # related_herbs = models.ForeignKey('self', blank=True, null=True)  ### Can ManyToManyField() do?
+    taxonomy = models.ForeignKey('TCMTaxonomy', blank=True, on_delete=models.CASCADE, null=True)
+    # compounds = models.ManyToManyField('Compound', blank=True)
+    herb = models.ForeignKey('Herb', blank=True, null=True, on_delete=models.CASCADE)
+
+    def get_absolute_url(self):
+        return reverse('sub_herb_detail', args=[self.pk])
 
     def __str__(self):
         return self.English_name or self.Chinese_name
@@ -259,6 +307,8 @@ class Prescription(models.Model):
         return '{}'.format(self.english_name or self.chinese_name or self.pk)
 
 
+
+###This is the same or similar chembl molecule with YaTCM
 @python_2_unicode_compatible
 class ChEMBL(models.Model): ### tanimoto_threshold=0.8
     chembl_id = models.CharField(
@@ -292,6 +342,13 @@ class ChEMBL(models.Model): ### tanimoto_threshold=0.8
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.url = "https://www.ebi.ac.uk/chembl/compound/inspect/{}".format(self.chembl_id)
         super(ChEMBL, self).save()
+
+class CHEMBLTarget(models.Model):
+    chembl_id = models.CharField(max_length=64)
+    name = models.CharField(max_length=1024, blank=True, null=True)
+
+    def get_chembl_url(self):
+        return 'https://www.ebi.ac.uk/chembl/target/inspect/{}'.format(self.chembl_id)
 
 
 @python_2_unicode_compatible
@@ -333,7 +390,6 @@ class Target_Chembl_id(models.Model):
              update_fields=None):
         self.target_chembl_id_url = 'https://www.ebi.ac.uk/chembl/target/inspect/{}'.format(self.target_chembl_id)
         super(Target_Chembl_id, self).save()
-
 
 
 @python_2_unicode_compatible
@@ -422,6 +478,8 @@ class KEGGPathwayCategory(MPTTModel):
     def __str__(self):
         return self.name
 
+    class Meta:
+        ordering = ['name']
 
 @python_2_unicode_compatible
 class KEGGPathway(models.Model):
@@ -430,6 +488,9 @@ class KEGGPathway(models.Model):
     kgml = models.TextField(blank=True, null=True)
     image = models.ImageField(upload_to='kegg_pathway_image/', storage=OverwirteStorage, blank=True, null=True)
     category = models.ForeignKey(KEGGPathwayCategory, null=True)
+
+    class Meta:
+        ordering = ['name']
 
     def __str__(self):
         return self.name
@@ -454,7 +515,7 @@ class KEGGPathway(models.Model):
         get pathway img from KEGG using KEGG API
         :return:
         """
-        return 'http://rest.kegg.jp/get/%s/img' % self.kegg_id
+        return 'http://rest.kegg.jp/get/%s/image' % self.kegg_id
 
     def kgml_parser(self, kegg_cpd_id_list):
         """
@@ -500,6 +561,9 @@ class KEGGCompound(models.Model):
     def __str__(self):
         return self.name or self.kegg_id
 
+    def get_kegg_img(self):
+        return 'http://rest.kegg.jp/get/{kegg_id}/image'.format(kegg_id=self.kegg_id)
+
     def refresh_similarity_to_tcm(self, threshold=0.8):
         """
         refresh the similarity mapping to TCM of this compounds
@@ -508,13 +572,13 @@ class KEGGCompound(models.Model):
 
         config.tanimoto_threshold = threshold
         value = MORGANBV_FP(Value(self.smiles))
-        self.similar_to_tcm.clear()
+        # self.similar_to_tcm.clear()
         try:
             for obj in Compound.objects.filter(bfp__tanimoto=value):
-                tcm_cpd = obj.compound
-                if not self.similar_to_tcm.filter(id=tcm_cpd.id).exists():
+                #tcm_cpd = obj.compound
+                if not self.similar_to_tcm.filter(id=obj.id).exists():
                     similarity = KEGGSimilarity.objects.create(
-                        tcm=tcm_cpd,
+                        tcm=obj,
                         kegg_compound=self  # todo: similarity value
                     )
                     similarity.save()
@@ -529,5 +593,10 @@ class KEGGSimilarity(models.Model):
     similarity = models.FloatField(blank=True, null=True)
 
 
-
-# Create your models here.
+class Feedback(models.Model):
+    username = models.CharField(max_length=256)
+    email = models.EmailField()
+    phone = models.CharField(max_length=64, blank=True, null=True)
+    message = models.TextField()
+    ip = models.GenericIPAddressField(blank=True, null=True)
+    create_at = models.DateTimeField(auto_now=True)

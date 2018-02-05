@@ -9,7 +9,8 @@ from collections import defaultdict
 from django.core.paginator import PageNotAnInteger, EmptyPage, Paginator
 from django.http import StreamingHttpResponse
 from django.core import serializers
-from .models import *    #NOQA
+from .models import *
+from .models import Assay_Chembl_id, Doc_Chembl_id, Target_Chembl_id, ChEMBL
 from django.views.generic import TemplateView, DetailView, View, ListView
 from django_rdkit.config import config
 from django_rdkit.models import *
@@ -40,7 +41,6 @@ class BrowseView(TemplateView):
     template_name = 'browse.html'
 
 class StructureSearchView(View):
-
     def post(self, request):
         if request.is_ajax():
             data = request.POST
@@ -275,6 +275,41 @@ class CompoundRelatedHerbsListView(TemplateView):
         context['herbs'] = related_herbs
         return context
 
+class ChemblRelatedAssaysListView(TemplateView):
+    template_name = 'chembl_assay_list.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(ChemblRelatedAssaysListView, self).get_context_data()
+        pk = int(kwargs['pk'])
+        chembl = ChEMBL.objects.get(pk=pk)
+        related_assays = chembl.assay_chembl_ids.all()
+        context['related_assays'] = related_assays
+        return context
+
+class ChemblRelatedDocsListView(TemplateView):
+    template_name = 'chembl_doc_list.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(ChemblRelatedDocsListView, self).get_context_data()
+        pk = int(kwargs['pk'])
+        chembl = ChEMBL.objects.get(pk=pk)
+        related_docs = chembl.doc_chembl_ids.all()
+        context['related_docs'] = related_docs
+        return context
+
+class ChemblRelatedTargetsListView(TemplateView):
+    template_name = 'chembl_target_list.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(ChemblRelatedTargetsListView, self).get_context_data()
+        pk = int(kwargs['pk'])
+        chembl = ChEMBL.objects.get(pk=pk)
+        related_targets = chembl.target_chembl_ids.all()
+        context['related_targets'] = related_targets
+        return context
+
+
+
 class CompoundRelatedTcmidHerbListView(TemplateView):
     template_name = 'tcmid_herb_list.html'
 
@@ -370,11 +405,9 @@ class HerbRelatedPrescriptionView(TemplateView):
         context['prescriptions'] = related_prescriptions
         return context
 
-
 class PrescriptionDetailView(DetailView):
     template_name = "prescription_detail.html"
     model = Prescription
-
     def get_context_data(self, **kwargs):
         context = super(PrescriptionDetailView, self).get_context_data()
         prescription = self.get_object()
@@ -384,10 +417,9 @@ class PrescriptionDetailView(DetailView):
         for herb in herbs[1:]:
             compounds = chain(compounds, herb.compounds.all())
         context['compounds'] = list(compounds)
-        context['compounds_top10'] = list(compounds)[:10]
-        context['compounds_10_last'] = list(compounds)[10:]
+        # context['compounds_top10'] = list(compounds)[:10]
+        # context['compounds_10_last'] = list(compounds)[10:]
         return context
-
 
 class HerbListView(ListView):
     model = Herb
@@ -413,6 +445,12 @@ class PathwaysBrowseListView(ListView):
     model = KEGGPathway
     context_object_name = 'pathway_list'
     template_name = 'pathways_browse_list_view.html'
+    paginate_by = 20
+
+class CompoundsBrowseListView(ListView):
+    model = Compound
+    context_object_name = 'compound_list'
+    template_name = 'compounds_browse_list_view.html'
     paginate_by = 20
 
 def compound_pathway_mapping_view(request, cpd_id, kegg_pathway_id):

@@ -12,7 +12,7 @@
                     <div class="col-xs-6 col-md-3">
                     {% if herb.image %}
                         <a href="{{ herb.get_absolute_url }}" class="thumbnail">
-                            <img src="{{ herb.image.url }}" alt="Herb Image" style="width: 300px; height: 300px">
+                            <img src="{% static herb.image %}" alt="Herb Image" style="width: 300px; height: 300px">
                             <abbr title="{{ herb.Engish_name }}">{{ herb.English_name | truncatechars:10}}</abbr>
                         </a>
                     {% else %}

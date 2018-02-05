@@ -1,32 +1,34 @@
 {% extends "base.html" %}
 {% load static staticfiles i18n %}
 {% block content %}
-{% if compound %}
-    <!-- compound basic information -->
-    <div id="compound-basic-info" class="panel panel-default">
+    {% if compound %}
+        <!-- compound basic information -->
+        <div id="compound-basic-info">
 
-            <div class="panel-heading h4"><strong>{{ compound.english_name }}'s basic information</strong></div>
-            <div class="panel-body">
-{#                <p><em>{{ compound.describe }}</em></p>#}
-                <table class="table text-left">
-                    <tbody>
+            <!--<div class="panel-heading" style="background-color: grey">-->
+                <h4><strong>{{ compound.english_name }}'s basic information</strong><h4>
+            </div>
+            <div>
+                {#                <p><em>{{ compound.describe }}</em></p>#}
+                <table class="table table-bordered table-striped">
+
                     <tr>
                         <th>Yatcm ID:</th>
                         <td>{{ compound.pk }}</td>
                     </tr>
                     <tr>
-                        <th>English Name</th>
+                        <th>English Name:</th>
                         <td>
                             {{ compound.english_name }}&nbsp;
 
                         </td>
                     </tr>
                     <tr>
-                        <th>Chinese Name</th>
+                        <th>Chinese Name:</th>
                         <td> {{ compound.chinese_name }}&nbsp;</td>
                     </tr>
                     <tr>
-                        <th>Synonyms</th>
+                        <th>Synonyms:</th>
                         <td>
                             {% for synonym in compound.englishidentity_set.all %}
                                 [{{ synonym.identity }}]
@@ -34,8 +36,8 @@
                         </td>
                     </tr>
                     <tr>
-                     <th>
-                            CID
+                        <th>
+                            CID:
                         </th>
                         <td>
                             {% for cid in compound.cid.all %}
@@ -44,131 +46,203 @@
                         </td>
                     </tr>
                     <tr>
-                        <th>CAS</th>
+                        <th>CAS:</th>
                         <td>
                             {% for cas in compound.cas.all %}
-                                <a href="http://www.molbase.com/en/cas-{{ cas.cas }}.html">{{ cas.cas }}&nbsp;</a>
+                                <a href="http://www.molbase.com/en/cas-{{ cas.cas }}.html">{{ cas.cas }}&nbsp&nbsp</a>
                             {% endfor %}
 
                         </td>
                     </tr>
-                    <tr>
-                        <th>ChEMBL</th>
+
+                <tr>
+                        <th>ChEMBL:</th>
                         <td>
                             {% for chembl in chembls %}
-                                <a href="{{ chembl.url }}">{{ chembl.chembl_id }}<a/>（Reseach hot degree is coming）
+                            <p>
+                            <a href="{{ chembl.url }}">{{ chembl.chembl_id }}&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp</a>
+                            <a href="{% url "chembl_related_assays" chembl.pk %}">{{ chembl.assay_chembl_ids.count }} assays;&nbsp&nbsp&nbsp&nbsp</a>
+                            <a href="{% url "chembl_related_docs" chembl.pk %}"> {{ chembl.doc_chembl_ids.count }} docs;&nbsp&nbsp&nbsp&nbsp</a>
+                            <a href="{% url "chembl_related_targets" chembl.pk %}"> {{ chembl.target_chembl_ids.count }} targets;</a>
                             {% endfor %}
+                            </p>
                         </td>
                     </tr>
+
+
+
                     <tr>
-                        <th>Categary</th>
+                        <th rowspan="2">Categary:</th>
                         <td>
-{#                            {{ compound.first_English_catogary }} --> {{ compound.second_English_catogary }}#}
+                            {#                            {{ compound.first_English_catogary }} --> {{ compound.second_English_catogary }}#}
                             {% for first_catagory in related_first_catagory %}
-                                {{ first_catagory.Chinese_first_catagory }}({{ first_catagory.English_first_catagory }})*&nbsp
+                                {{ first_catagory.Chinese_first_catagory }}({{ first_catagory.English_first_catagory }}
+                                )*&nbsp
                             {% endfor %}
                         </td>
                     </tr>
                     <tr>
-                        <th></th>
                         <td>
                             {% for second_catagory in related_second_catagory %}
-                                {{ second_catagory.Chinese_second_catagory }}({{ second_catagory.English_second_catagory }})*&nbsp
+                                {{ second_catagory.Chinese_second_catagory }}(
+                                {{ second_catagory.English_second_catagory }})*&nbsp
                             {% endfor %}
                         </td>
                     </tr>
-                    </tbody>
                 </table>
             </div>
 
-    </div>
 
-    <!-- compound structure information -->
-    <div id="compound-structure" class="container">
-        <h4><strong>Structure information</strong></h4>
-            <div class="row">
+
+        <!-- compound structure information -->
+        <div id="compound-structure" class="row">
+            <h4><strong>Structure information</strong></h4>
                 <div class="col-md-4">
                     {% if compound.mol_image %}
-                        <img class="img-responsive" src="{{ compound.mol_image.url }}" alt="compound picture" style="height: 300px;">
+                        <img class="img-responsive" src="{{ compound.mol_image.url }}" alt="compound picture"
+                             style="height: 300px;width: 100%">
                     {% else %}
                         Molecular structure is Not generated
                     {% endif %}
                 </div>
                 <div class="col-md-8">
-                    <table class="table">
-                        <tr><th>Smiles</th></tr>
-                        <tr><td>{{ compound.smiles }}</td></tr>
-                        <tr><th>Formula</th></tr>
-                        <tr><td>{{ compound.formula }}</td></tr>
-                        <tr><th>Mol weight</th></tr>
-                        <tr><td>{{ compound.mol_weight }}</td></tr>
-                        <tr><th>Calculate attributes</th></tr>
+                    <table class="table table-striped table-bordered">
                         <tr>
-                            <td>
-                                Alogp:{{ compound.alogp }};
-                                PSA:{{ compound.psa }};
-                                HBA:{{ compound.hba }};
-                                HBD:{{ compound.hbd }};
-                                RTB:{{ compound.rtb }}
-                            </td>
+                            <th>Smiles:</th>
+                            <td>{{ compound.smiles }}
                         </tr>
-                        <tr><th>Mol2 file</th></tr>
-                        <tr><td><a href="{{ compound.mol_file.url }}">{{ compound.english_name }}</a></td></tr>
+                        <tr>
+                            <th>Formula:</th>
+                            <td>{{ compound.formula }}</td>
+                        </tr>
+                        <tr>
+                            <th>Mol weight:</th>
+                            <td>{{ compound.mol_weight }}</td>
+                        </tr>
+                        <tr>
+                            <th>Alogp:</th>
+                            <td>{{ compound.alogp }}</td>
+                        </tr>
+                        <tr>
+                            <th>PSA:</th>
+                            <td>{{ compound.psa }}</td>
+                        </tr>
+                        <tr>
+                            <th>HBA:</th>
+                            <td>{{ compound.hba }}</td>
+                        </tr>
+                        <tr>
+                            <th>HBD:</th>
+                            <td>{{ compound.hbd }}</td>
+                        </tr>
+                        <tr>
+                            <th>RTB:</th>
+                            <td>{{ compound.rtb }}</td>
+                        </tr>
+                        <tr>
+                            <th>Mol2 file</th>
+                            {% if compound.mol_file %}
+                                <td><a href="{{ compound.mol_file.url }}">{{ compound.english_name }}</a></td>
+                            {% else %}
+                                <td>The molecule file is not generated</td>
+                            {% endif %}
+                        </tr>
                     </table>
                 </div>
-            </div>
+        </div>
 
-    </div>
+       <!--Related Infomation-->
+       <div id="related-infomation">
+           <h4><strong>Related information</strong></h4>
+           <table class="table table-bordered table-striped">
+               <tr>
+                   <th rowspan="2">Related Herbs:</th>
+                   <td>
+                       <a href="{% url "compound_related_herbs" compound.pk %}">{{ compound.herb_set.count }} records</a>
+                   </td>
+               </tr>
+               <tr>
+                   <td>
+                       {% for herb in related_herbs %}
+                       <a href="{{ herb.get_absolute_url }}">{{ herb.English_name }}&nbsp&nbsp</a>
+                       {% endfor %}
+                   </td>
+               </tr>
+               <tr>
+                   <th rowspan="2">Related TCMID Herbs:</th>
+                   <td>
+                       <a href="{% url "compound_related_tcmid_herbs" compound.pk %}">{{compound.tcmid_herbs_set.count}}
+                       records</a>
+                   </td>
+               </tr>
+               <tr>
+                   <td>
+                       {% for herb in related_tcmid_herbs %}
+                       <a href="{{ herb.tcmid_link }}">{{ herb.English_name }}&nbsp&nbsp</a>
+                       {% endfor %}
+                   </td>
+               </tr>
+               <tr>
+                   <th rowspan="2">Related ChEMBL Compounds:</th>
+                   <td>
+                       <a href="{% url "compound_related_chembl_compounds" compound.pk %}">{{ related_chembls.count }}
+                       records</a>
+                   </td>
+               </tr>
+               <tr>
+                   <td>
+                       {% for chembl_compound in related_chembls %}
+                       <a href="{{ chembl_compound.url }}">{{ chembl_compound.chembl_id }}&nbsp&nbsp</a>
+                       {% endfor %}
+                   </td>
+               </tr>
+               <tr>
+                   <th rowspan="2">Related Targets:</th>
+                   <td>
+                       <a href="{% url "compound_related_targets" compound.pk %}">{{ compound.target_set.count }} records</a>
+                   </td>
+               </tr>
+               <tr>
+                   <td>
+                       {% for target in related_targets %}
+                       {#            <a href="{{ chembl_compound.url }}">{{ chembl_compound.chembl_id }}</a>#}
+                       {{ target.target_name }}(<a href="{{ target.uniprot_link }}">{{ target.uniprot_name }})&nbsp&nbsp</a>
+                       {% endfor %}
+                   </td>
+               </tr>
+           </table>
+       </div>
 
-    <!-- compound related herbs-->
-    <div id="related_herbs">
-    <h4>Related Herbs:&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
-        <a href="{% url "compound_related_herbs" compound.pk %}">{{ compound.herb_set.count}} records</a>
-    </h4>
-        {% for herb in related_herbs %}
-            <a href="{{ herb.get_absolute_url }}">{{ herb.English_name }}&nbsp&nbsp</a>
-        {% endfor %}
-{#    <table class="table table-responsive">#}
-{#        <tr>#}
-{#            <th style="width: 33%">Related Herbs</th>#}
-            {# todo: change the href to compound related herbs list view #}
-{#            <td><a href="{% url "compound_related_herbs" compound.pk %}">{{ compound.herb_set.count}} records</a></td>#}
-{#        </tr>#}
-{#    </table>#}
-    </div>
 
-    <!-- compound related tcmid herbs-->
-    <div id="related_tcmid_herbs">
-    <h4>Related TCMID Herbs:&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
-        <a href="{% url "compound_related_tcmid_herbs" compound.pk %}">{{ compound.tcmid_herbs_set.count}} records</a>
-    </h4>
-        {% for herb in related_tcmid_herbs %}
-            <a href="{{ herb.tcmid_link }}">{{ herb.English_name }}&nbsp&nbsp</a>
-        {% endfor %}
-    </div>
+        <!-- compound related pathways -->
+        <div>
+        {% if compound.related_ChEMBL_targets.all %}
+            <h4>
+                <strong>Potential protein targets</strong>
+                ({{ compound.related_ChEMBL_targets.all | length }})(predicted
+                    by <strong>SEA</strong><sup>1</sup>.)</h4>
+                <div style="border: solid 1px #ddd">
+                    <div>
+                    {% for target in compound.related_ChEMBL_targets.all %}
+                        <i>({{ forloop.counter }}).</i>
+                        <a href='{{ target.get_chembl_url }}'>{{ target.chembl_id }}</a>
+                    {% endfor %}
+                 </div>
+            <i>1. Wang et al. 2016 DOI: 10.1186/s13321-016-0130-x</i>
+                </div>
+        {% endif %}
+        </div>
+        <br/>
+        <!-- compound related pathways -->
+     <h4><strong>KEGG metabolism pathway mappings</strong></h4>
+        <div style="border: 1px solid #ddd">
+            {% if compound.get_kegg_pathways %}
 
+                {% for pathway in compound.get_kegg_pathways %}
+                    {% include 'includes/kegg_pathway_list.html' %}
+                {% endfor %}
+            {% endif %}
+        </div>
 
-    <!-- compound related chembl compounds -->
-    <div id="related_chembls">
-    <h4>Related ChEMBL compounds:
-        <a href="{% url "compound_related_chembl_compounds" compound.pk %}">{{ related_chembls.count}} records</a>
-    </h4>
-        {% for chembl_compound in related_chembls %}
-            <a href="{{ chembl_compound.url }}">{{ chembl_compound.chembl_id }}&nbsp&nbsp</a>
-        {% endfor %}
-    </div>
-
-    <!-- compound related targets -->
-    <div id="related_targets">
-    <h4>Related targets:
-        <a href="{% url "compound_related_targets" compound.pk %}">{{ compound.target_set.count}} records</a>
-    </h4>
-        {% for target in related_targets %}
-{#            <a href="{{ chembl_compound.url }}">{{ chembl_compound.chembl_id }}</a>#}
-            {{ target.target_name }}(<a href="{{ target.uniprot_link }}">{{ target.uniprot_name }})&nbsp&nbsp</a>
-        {% endfor %}
-    </div>
-
-    <!-- compound related pathways -->
-{% endif %}
+    {% endif %}
 {% endblock %}

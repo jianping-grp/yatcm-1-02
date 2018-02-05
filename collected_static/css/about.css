@@ -1,0 +1,31 @@
+.carousel-control {
+    color: transparent;
+}
+
+.carousel-control.left {
+    background-image:linear-gradient(to right,rgba(0,0,0,0) 0,rgba(0,0,0,0) 100%); ;
+}
+
+.carousel-control.right {
+    background-image:linear-gradient(to right,rgba(0,0,0,0) 0,rgba(0,0,0,0) 100%); ;
+}
+
+.carousel {
+    height: auto;
+}
+.carousel .item {
+    height:auto;
+    background-color: transparent;
+}
+
+.carousel-inner >.item > img {
+    height: auto;
+}
+
+span>img {
+    width: 100%;
+}
+
+.text-position {
+    text-align: center;
+}

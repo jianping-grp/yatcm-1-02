@@ -1,7 +1,7 @@
 {% extends 'browse.html' %}
 {% load static staticfiles bootstrap_pagination %}
 {% block css %}
-    <link href="{% static 'css/browse.css' %}" rel="stylesheet">
+    <link href="{% static "css/browse.css" %}" rel="stylesheet">
 {% endblock %}
 {% block browse-table %}
     <table class="table table-striped">
@@ -20,7 +20,7 @@
         {% for herb in  herb_list %}
             <tr>
                 <td>{{ forloop.counter }}</td>
-                <td><img src="{{ herb.image }}" class="img-table img-thumbnail img-table"></td>
+                <td><img src="{% static herb.image %}" class="img-table img-thumbnail img-table"></td>
                 <td>{{ herb.English_name }}</td>
                 <td>{{ herb.pinyin_name }}</td>
                 <td> {{ herb.Chinese_name }}</td>

@@ -12,6 +12,7 @@
 
     <!-- core bootstrap css style sheet -->
     <link href="{% static "css/bootstrap.min.css" %}" rel="stylesheet">
+    <link href="{% static "css/base.css" %}" rel="stylesheet">
     <link href="https://fonts.gdgdocs.org/css?family=Lobster" rel="stylesheet" type="text/css">
     {% block css %}{% endblock css %}
 
@@ -41,13 +42,13 @@
             {#            </div>#}
             {#        </div>#}
             <div class="col-md-10 col-md-offset-1" id="web-header">
-                <h1 style="font-family: Lobster serif;">Yet Another Traditional Chinese Medicine DataBase</h1>
+                <h1 style="font-family: Lobster serif; text-align: center">Yet Another Traditional Chinese Medicine DataBase</h1>
             </div>
         </div>
 
     </div>
 
-    <nav class="navbar navbar-static-top navbar-inverse" role="navigation">
+    <nav class="navbar navbar-static-top navbar-default" role="navigation">
         <div class="container">
             <div class="navbar-header">
                 <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
